@@ -97,6 +97,7 @@ class OrderController extends Controller implements HasMiddleware
      */
     public function show(Order $order)
     {
+        Gate::authorize('modify',$order);
         $result = $order->with('orderItems.product')->get();
         return response()->json([
             'success' => true,
