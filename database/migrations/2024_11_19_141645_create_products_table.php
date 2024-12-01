@@ -17,7 +17,9 @@ return new class extends Migration
             $table->double('price');
             $table->integer('stock');
             $table->foreignId('store_id')->constrained()->cascadeOnDelete();
-            $table->longText('description');
+            $table->double('rating')->nullable();
+            $table->string('image')->nullable();
+            $table->longText('description')->nullable();
             $table->timestamps();
         });
     }
