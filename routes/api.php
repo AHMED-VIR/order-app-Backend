@@ -13,10 +13,13 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/cart/items',[CartController::class,'showUserCart']);
+Route::get('/cart/ids',[CartController::class,'showUserCartIds']);
+Route::delete('/cart/delete',[CartController::class,'delete']);
 Route::apiResource('/cart',CartController::class);
 
 Route::delete('/wishlist/delete',[WishListController::class,'delete']);
 Route::get('/wishlist/items',[WishListController::class,'showUserWishList']);
+Route::get('/wishlist/ids',[WishListController::class,'showUserWishListIds']);
 Route::apiResource('/wishlist',WishListController::class);
 
 Route::get('/order/view',[OrderController::class,'showUserOrders']);
