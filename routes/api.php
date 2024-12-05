@@ -1,11 +1,11 @@
 <?php
+use App\Http\Controllers\AdminController;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WishListController;
-use AppHttpControllers\StoreController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,10 +22,11 @@ Route::apiResource('/wishlist',WishListController::class);
 
 Route::get('/order/view',[OrderController::class,'showUserOrders']);
 Route::apiResource('/order',OrderController::class);
+
+
 Route::apiResource('/store',StoreController::class);
 
-Route::apiResource('/products',ProductController::class);
-
+Route::post('/admin/register',[AdminController::class,'register']);
 Route::post('/register',[AuthController::class,'register']);
 Route::post('/login',[AuthController::class,'login']);
 Route::post('/logout',[AuthController::class,'logout']);
