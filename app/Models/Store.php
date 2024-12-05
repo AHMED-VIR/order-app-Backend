@@ -9,7 +9,7 @@ class Store extends Model
 {
     /** @use HasFactory<\Database\Factories\StoreFactory> */
     use HasFactory;
-
+    
     protected $fillable = [
         'name',
         'location',
