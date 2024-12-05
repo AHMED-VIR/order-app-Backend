@@ -8,7 +8,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 
-class AuthController extends Controller implements HasMiddleware
+class AdminController extends Controller implements HasMiddleware
 {
 
     public static function middleware()
@@ -40,7 +40,7 @@ class AuthController extends Controller implements HasMiddleware
             'password'=>bcrypt($fields['password']),
             'name'=>$fields['name'],
             'profile_image'=>$profileImagePath,
-            'is_admin'=>false,
+            'is_admin'=>true,
             'phone_number'=>$fields['phone_number'],
             'Location'=>$fields['Location']
         ]);
@@ -56,35 +56,6 @@ class AuthController extends Controller implements HasMiddleware
             ],
         ],201);
     }
-
-    public function login(Request $request){
-        $fields = $request->validate([
-            'email'=>"email|exists:users|required",
-            'password'=>"required",
-        ]);
-        $user = User::where('email',$request->email)->first();
-        if(!$user || !Hash::check($request->password,$user->password)){
-            return response()->json([
-                'success'=>false,
-                'message'=>'Invalid email or password'
-            ],403);
-        }
-        $token = $user->createToken($request->email)->plainTextToken;
-        return response()->json([
-            'success'=>true,
-            'message'=>"Login successfully",
-            'data'=>[
-                'user'=>$user,
-                'token'=>$token
-            ],
-        ],200);
-    }
-
-    public function logout(Request $request){
-        $request->user()->tokens()->delete();
-        return response()->json([
-            'success'=>true,
-            'message'=>"Logout successfully"
-        ],200);
-    }
 }
+
+
