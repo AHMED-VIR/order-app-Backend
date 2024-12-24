@@ -21,7 +21,8 @@ class ProductFactory extends Factory
         return [
             'name'=>fake()->name(),
             'store_id'=>Store::inRandomOrder()->value('id'),
-            'stock'=>fake()->numberBetween(20,300),
+            'stock'=>fake()->numberBetween(2,6),
+            'rating'=>fake()->numberBetween(1,5),
             'price'=>fake()->numberBetween(10,1000),
             'description'=>fake()->sentence()
         ];

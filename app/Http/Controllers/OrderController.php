@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Cart;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -35,36 +36,40 @@ class OrderController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        $validate = $request->validate(
-            [
-                'items'=>'required|array',
-                'items.*.product_id'=>'required|exists:products,id',
-                'items.*.quantity'=>'required|integer|min:1',
-            ]
-        );
         DB::beginTransaction(); 
-        try{
+        try{            
+
+            $cart = Cart::where('user_id', $request->user()->id)->get();
+            if ($cart->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cart is empty. Add items before placing an order.',
+                ], 400);
+            }
+            
             $order = Order::create([
                 'user_id'=>$request->user()->id,
                 'total_amount'=>0,
                 'status'=>'pending'
             ]);
-
+            
             $totalAmount = 0;
-
-            foreach($validate['items'] as $item){
+            foreach($cart as $item){
                 $product = Product::findOrFail($item['product_id']);
                 OrderItem::create([
                     'order_id'=>$order->id,
                     'product_id'=>$product->id,
                     'price'=>$product->price,
-                    'quantity'=>$item['quantity']
+                    'quantity'=>$item['product_count']
                     ]
                 );
-                $totalAmount += $product['price'] * $item['quantity'];
+                $totalAmount += $product['price'] * $item['product_count'];
+                $currentStock = $product->value('stock');
+                $currentCartCount = $item['product_count'];
+                $product->update(['stock'=>$currentStock - $currentCartCount]);
             }
-
             $order->update(['total_amount'=>$totalAmount]);
+            $cart->delete();
             DB::commit();
             return response()->json(
                 [
