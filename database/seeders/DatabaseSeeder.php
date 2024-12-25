@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
@@ -15,8 +16,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::factory(10)->create();
         Store::factory(40)->create();
-        // Product::factory(200)->create();
+        Product::factory(100)->create();
+        // Cart::factory(20)->create();
     }
 }

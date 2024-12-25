@@ -47,7 +47,7 @@ class WishListController extends Controller implements HasMiddleware
             'success'=>true,
             'message'=>'item added to wishlist',
             'wishlistItem'=>$wishlist
-          ]);
+          ],201);
     }
 
 
@@ -60,6 +60,14 @@ class WishListController extends Controller implements HasMiddleware
         ]);
     }
 
+    public function showUserWishlistIds(Request $request){
+        $ids =  WishList::where('user_id',$request->user()->id)->select('product_id')->get();
+        return response()->json([
+            'success'=>true,
+            'message'=>'showing user wishlist products ids',
+            'wishlist_ids'=>$ids
+        ]);
+    }
 
     public function delete(Request $request){
        
@@ -67,18 +75,17 @@ class WishListController extends Controller implements HasMiddleware
             'item_id'=>'required|integer'
         ]);
 
-        if(!WishList::where('id',$fields['item_id'])->exists()){
+        if(!WishList::where('product_id',$fields['item_id'])->where('user_id',$request->user()->id)->exists()){
             return response()->json([
                 'success'=>false,
                 'message'=>'item does not exist'
             ],404);
         }
-        $wishList = WishList::where('id',$fields['item_id'])->get()->first();
-        Gate::authorize('modify',$wishList);
+        $wishList = WishList::where('product_id',$fields['item_id'])->where('user_id',$request->user()->id)->get()->first();
         $wishList->delete();
         return response()->json([
             'success'=>true,
             'message'=>'item removed from wishlist successfully'
-        ]);
+        ],200);
     }
 }
