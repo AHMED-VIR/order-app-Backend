@@ -58,14 +58,14 @@ class StoreController extends Controller
     public function update(Request $request, Store $store)
     {
         $fields = $request->validate([
-            'name' => 'required|max:255',
-            'type'=> 'required',
-            'number'=>'numeric|min:10',
-            'location'=>'required',
-            'description'=>'required'
-        
-        
+            'name' => 'nullable|max:255',
+            'type'=> 'nullable',
+            'number'=>'nullable|numeric|min:10',
+            'location'=>'nullable',
+            'description'=>'nullable'
         ]);
+
+        $store->update($fields);
         return response()->json([
             'success'=>true,
             'message'=>'Store updated successfully',
