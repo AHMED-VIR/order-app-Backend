@@ -15,7 +15,8 @@ class Store extends Model
         'location',
         'type',
         'number',
-        'description'
+        'description',
+        'image'
     ];
 
     public function  products(){

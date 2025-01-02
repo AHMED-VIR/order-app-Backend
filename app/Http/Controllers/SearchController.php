@@ -33,7 +33,8 @@ class SearchController extends Controller
             );
         }
 
-        $products = Product::where('name','LIKE',"$query%")->get();
+        $products = Product::where('name','LIKE',"$query%")->with('store:id,name')
+        ->select('id','name','price','rating','stock','description','image','store_id')->get();;
         $stores = Store::where('name','LIKE',"$query%")->get();
         return response()->json(
             [

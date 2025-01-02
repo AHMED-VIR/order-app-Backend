@@ -28,10 +28,10 @@ class StoreController extends Controller
         $fields = $request->validate([
             'name' => 'required|max:255',
             'type'=> 'required',
-            'number'=>'numeric|min:10',
+            'number'=>'required|numeric|min:10',
             'location'=>'required',
-            'description'=>'required'
-        
+            'image'=> 'nullable|string',
+            'description'=>'required|string'
         ]);
         $store= Store::create($fields);
         return response()->json([
@@ -58,19 +58,46 @@ class StoreController extends Controller
     public function update(Request $request, Store $store)
     {
         $fields = $request->validate([
-            'name' => 'required|max:255',
-            'type'=> 'required',
-            'number'=>'numeric|min:10',
-            'location'=>'required',
-            'description'=>'required'
-        
-        
+            'name' => 'nullable|max:255',
+            'type'=> 'nullable',
+            'number'=>'nullable|numeric|min:10',
+            'location'=>'nullable',
+            'image'=> 'nullable|string',
+            'description'=>'nullable|string'
         ]);
+
+
+        if(isset($fields['name'])){
+            $store->name = $fields['name'];
+        }
+
+        if(isset($fields['location'])){
+            $store->location = $fields['location'];
+        }
+
+        if(isset($fields['type'])){
+            $store->type = $fields['type'];
+        }
+
+        if(isset($fields['number'])){
+            $store->number = $fields['number'];
+        }
+
+        if(isset($fields['description'])){
+            $store->description = $fields['description'];
+        }
+
+        if(isset($fields['image'])){
+            $store->image = $fields['image'];
+        }
+
+        $store->save();
+
         return response()->json([
-            'success'=>true,
-            'message'=>'Store updated successfully',
-            'data'=>$store
-        ],201);
+            'success' => true,
+            'message' => "Store information updated successfully",
+            'data' => $store,
+        ], 201);
     }
 
     /**

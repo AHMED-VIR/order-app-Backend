@@ -23,8 +23,8 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function index()
     {
-        $products = Product::where('stock','>',0)
-        ->select('id','name','price','rating','stock')->get();
+        $products = Product::where('stock','>',0)->with('store:id,name')
+        ->select('id','name','price','rating','stock','description','image','store_id')->get();
         return response()->json(
             [
                 'success'=>true,
@@ -44,7 +44,7 @@ class ProductController extends Controller implements HasMiddleware
             'stock'=>'required|integer',
             'price'=>'required|numeric',
             'store_id'=>'required|exists:stores,id|integer',
-            'image'=> 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'image'=> 'nullable|string',
             'description'=>'nullable|string'
         ]);
         $product = Product::create($fields);
@@ -53,7 +53,7 @@ class ProductController extends Controller implements HasMiddleware
             'message'=>'product added successfully',
             'product'=>$product
         ]
-        );
+        ,201);
     }
 
     /**
@@ -61,12 +61,14 @@ class ProductController extends Controller implements HasMiddleware
      */
     public function show(Product $product)
     {
-        $result = $product->with('store');
+        $result = Product::where('id',$product->id)->with('store:id,name')
+        ->select('id','name','price','rating','stock','description','image','store_id')->get()->first();
+
         return response()->json(
             [
                 'success'=>true,
                 'message'=>'showing product details',
-                'product'=>$product
+                'product'=>$result,
             ]
         );
     }
@@ -82,7 +84,8 @@ class ProductController extends Controller implements HasMiddleware
                 404
             );
         }
-        $products = Product::where('store_id',$storeId)->get();
+        $products = Product::where('store_id',$storeId)->with('store:id,name')
+        ->select('id','name','price','rating','stock','description','image','store_id')->get();
         return response()->json(
             [
                 'success'=>true,
@@ -100,27 +103,31 @@ class ProductController extends Controller implements HasMiddleware
     {
      
         $fields = $request->validate([
-            'name'=>'required|max:255|string',
-            'stock'=>'required|integer',
-            'price'=>'required|numeric',
+            'name'=>'nullable|max:255|string',
+            'stock'=>'nullable|integer',
+            'price'=>'nullable|numeric',
             'description'=>'nullable|string'
         ]);
 
 
-        if(isset($feilds['name'])){
-            $product->name = $feilds['name'];
+        if(isset($fields['name'])){
+            $product->name = $fields['name'];
         }
 
-        if(isset($feilds['stock'])){
-            $product->stock = $feilds['stock'];
+        if(isset($fields['stock'])){
+            $product->stock = $fields['stock'];
         }
 
-        if(isset($feilds['price'])){
-            $product->price = $feilds['price'];
+        if(isset($fields['price'])){
+            $product->price = $fields['price'];
         }
 
-        if(isset($feilds['description'])){
-            $product->description = $feilds['description'];
+        if(isset($fields['description'])){
+            $product->description = $fields['description'];
+        }
+
+        if(isset($fields['image'])){
+            $product->image = $fields['image'];
         }
 
         $product->save();
@@ -129,7 +136,7 @@ class ProductController extends Controller implements HasMiddleware
             'success' => true,
             'message' => "Product information updated successfully",
             'data' => $product,
-        ], 200);
+        ], 201);
     }
 
     /**

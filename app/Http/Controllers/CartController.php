@@ -64,6 +64,16 @@ class CartController extends Controller implements HasMiddleware
         $cart_item = Cart::where('user_id', $request->user()->id)
             ->where('product_id', $fields['product_id']);
 
+            
+        $currentStock = $product->stock;
+
+        if (($fields['product_count']) > $currentStock) {
+            return response()->json([
+                "success" => false,
+                "message" => "invalid quantity",
+            ], 400);
+        }
+
         if ($cart_item->exists()) {
             $currentStock = $product->stock;
             $currentCartCount = $cart_item->value('product_count');
@@ -74,7 +84,7 @@ class CartController extends Controller implements HasMiddleware
                     "message" => "item out of stock",
                 ], 400);
             } else {
-                $cart_item->update(['product_count' => $currentCartCount + $fields['product_count']]);
+                $cart_item->increment('product_count',$fields['product_count']);
                 $updatedCartItem = $cart_item->first();
                 DB::commit();
                 return response()->json([
@@ -86,14 +96,6 @@ class CartController extends Controller implements HasMiddleware
             }
         }
 
-        $currentStock = $product->stock;
-
-        if (($fields['product_count']) > $currentStock) {
-            return response()->json([
-                "success" => false,
-                "message" => "invalid quantity",
-            ], 400);
-        }
         $newCartItem = Cart::create([
             'user_id' => $request->user()->id,
             'product_id' => $fields['product_id'],
@@ -133,6 +135,13 @@ class CartController extends Controller implements HasMiddleware
             ],404);
         }
         $cart = Cart::where('product_id',$fields['item_id'])->where('user_id',$request->user()->id)->get()->first();
+        if($cart->product_count > 1){
+            $cart->decrement('product_count',1);
+            return response()->json([
+                'success'=>true,
+                'message'=>'item removed from cart successfully'
+            ],200);    
+        }
         $cart->delete();
         return response()->json([
             'success'=>true,

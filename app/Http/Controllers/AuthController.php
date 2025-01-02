@@ -25,7 +25,8 @@ class AuthController extends Controller implements HasMiddleware
             'password' => 'required|min:3|confirmed',
             'image'=> 'nullable|image|mimes:png,jpg,jpeg|max:2048',
             'phone_number'=>'required|numeric|min:3|unique:users',
-            'Location'=>'required'
+            'Location'=>'required',
+            'is_admin'=>'required'
         ]);
 
         $profileImagePath = null;
@@ -37,7 +38,7 @@ class AuthController extends Controller implements HasMiddleware
             'password'=>bcrypt($fields['password']),
             'name'=>$fields['name'],
             'profile_image'=>$profileImagePath,
-            'is_admin'=>false,
+            'is_admin'=>$fields['is_admin'],
             'phone_number'=>$fields['phone_number'],
             'Location'=>$fields['Location']
         ]);
@@ -116,44 +117,24 @@ class AuthController extends Controller implements HasMiddleware
 
     }
 
+    public function userWallet(Request $request){
+        $fields = $request->validate([
+            'ammount'=>'required|numeric',
+            'password'=>'required'
+        ]);
+        $user = $request->user();
+        if(!Hash::check($request->password,$user->password)){
+            return response()->json([
+                'success' => false,
+                'errors' => ['password' => ['incorrect password']],
+            ], 401);
+        }
+        $user->increment('wallet', $fields['ammount']);
+        return response()->json([
+            'success' => true,
+            'message' => "ammount added to user wallet successfully",
+            'data' => $user,
+        ], 200);
+    }
 }
 
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:orders/pages/admin.dart';
-// import 'package:orders/pages/edit_info.dart';
-// import 'package:orders/providers/user.dart';
-// import 'package:provider/provider.dart';
-
-// class UserPage extends StatelessWidget {
-//   const UserPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final user = Provider.of<UserProvider>(context).user;
-//     return Column(
-//       children: [
-//         TextButton(
-//           onPressed: () {
-//             Navigator.push(context,
-//                 MaterialPageRoute(builder: (context) => const EditInfo()));
-//           },
-//           child: const Text('change Info'),
-//         ),
-//         user != null && user.isAdmin == 1
-//             ? TextButton(
-//                 onPressed: () {
-//                   Navigator.push(
-//                       context,
-//                       MaterialPageRoute(
-//                           builder: (context) => const AdminPage()));
-//                 },
-//                 child: const Text('Admin Page'),
-//               )
-//             : const SizedBox.shrink()
-//       ],
-//     );
-//   }
-// }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('type');
             $table->bigInteger('number');
             $table->string('location');
+            $table->string('image')->nullable();
             $table->longText('description');
             $table->timestamps();
         });

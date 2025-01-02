@@ -55,21 +55,33 @@ class OrderController extends Controller implements HasMiddleware
             
             $totalAmount = 0;
             foreach($cart as $item){
-                $product = Product::findOrFail($item['product_id']);
+                $product = Product::findOrFail($item->product_id);
                 OrderItem::create([
                     'order_id'=>$order->id,
                     'product_id'=>$product->id,
                     'price'=>$product->price,
-                    'quantity'=>$item['product_count']
+                    'quantity'=>$item->product_count
                     ]
                 );
-                $totalAmount += $product['price'] * $item['product_count'];
-                $currentStock = $product->value('stock');
-                $currentCartCount = $item['product_count'];
+                $totalAmount = $totalAmount + ($product->price * $item->product_count);
+                $currentStock = $product->stock;
+                $currentCartCount = $item->product_count;
                 $product->update(['stock'=>$currentStock - $currentCartCount]);
             }
             $order->update(['total_amount'=>$totalAmount]);
-            $cart->delete();
+            $user = $request->user();
+            $wallet = $user->wallet;
+            if($totalAmount > $wallet){
+                DB::rollBack();
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'you dont have enough cash',
+                ],400);
+            }
+            $user->decrement('wallet', $totalAmount);
+            foreach($cart as $item){
+            $item->delete();
+            }
             DB::commit();
             return response()->json(
                 [
